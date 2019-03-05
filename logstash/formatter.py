@@ -4,9 +4,9 @@ import socket
 import sys
 from datetime import datetime
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
 class LogstashFormatterBase(logging.Formatter):
