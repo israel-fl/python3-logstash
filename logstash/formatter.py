@@ -1,15 +1,25 @@
-import traceback
 import logging
 import socket
-import sys
+import traceback
 from datetime import datetime
+
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 
 class LogstashFormatterBase(logging.Formatter):
+    # The list contains all the attributes listed in
+    # http://docs.python.org/library/logging.html#logrecord-attributes
+    skip_list = (
+        'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
+        'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
+        'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
+        'processName', 'relativeCreated', 'thread', 'threadName', 'extra'
+    )
+
+    easy_types = (str, bool, dict, float, int, list, type(None))
 
     def __init__(self, message_type='Logstash', tags=None, fqdn=False):
         self.message_type = message_type
@@ -21,24 +31,11 @@ class LogstashFormatterBase(logging.Formatter):
             self.host = socket.gethostname()
 
     def get_extra_fields(self, record):
-        # The list contains all the attributes listed in
-        # http://docs.python.org/library/logging.html#logrecord-attributes
-        skip_list = (
-            'args', 'asctime', 'created', 'exc_info', 'exc_text', 'filename',
-            'funcName', 'id', 'levelname', 'levelno', 'lineno', 'module',
-            'msecs', 'msecs', 'message', 'msg', 'name', 'pathname', 'process',
-            'processName', 'relativeCreated', 'thread', 'threadName', 'extra')
-
-        if sys.version_info < (3, 0):
-            easy_types = (basestring, bool, dict, float, int, long, list, type(None))
-        else:
-            easy_types = (str, bool, dict, float, int, list, type(None))
-
         fields = {}
 
         for key, value in record.__dict__.items():
-            if key not in skip_list:
-                if isinstance(value, easy_types):
+            if key not in self.skip_list:
+                if isinstance(value, self.easy_types):
                     fields[key] = value
                 else:
                     fields[key] = repr(value)
@@ -70,7 +67,7 @@ class LogstashFormatterBase(logging.Formatter):
     @classmethod
     def format_timestamp(cls, time):
         tstamp = datetime.utcfromtimestamp(time)
-        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
+        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03dZ" % (tstamp.microsecond / 1000)
 
     @classmethod
     def format_exception(cls, exc_info):
@@ -89,8 +86,9 @@ class LogstashFormatterVersion0(LogstashFormatterBase):
         message = {
             '@timestamp': self.format_timestamp(record.created),
             '@message': record.getMessage(),
-            '@source': self.format_source(self.message_type, self.host,
-                                          record.pathname),
+            '@source': self.format_source(
+                self.message_type, self.host, record.pathname
+            ),
             '@source_host': self.host,
             '@source_path': record.pathname,
             '@tags': self.tags,
