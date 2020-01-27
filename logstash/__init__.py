@@ -8,6 +8,3 @@ try:
 except:
    # you need to install AMQP support to enable this handler.
    pass
- 
-
-
