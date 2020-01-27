@@ -1,13 +1,12 @@
-import json
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
 
-from logging import Filter
 from logging.handlers import SocketHandler
 
 import pika
+
 from logstash import formatter
 
 
