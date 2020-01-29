@@ -78,7 +78,7 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
-        message = self.fix_log_message(message)
+        message = self.json_sanitize_message(message)
         return json.dumps(message)
 
     @classmethod
