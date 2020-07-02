@@ -75,7 +75,34 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def serialize(cls, message):
+        message = self.json_sanitize_message(message)
         return json.dumps(message)
+
+    @classmethod
+    def json_sanitize_message(cls, message):
+        if type(message) is dict:
+            message=message.copy()
+            for k, v in message.items():
+                message[k] = self.json_sanitize_message(v)
+            return message
+
+        elif type(message) in (list, ):
+            message=list(message)
+            for i in range(len(message)):
+                message[i] = self.json_sanitize_message(message[i])
+            return message
+
+        elif type(message) in (datetime.datetime, datetime.date):
+            return message.isoformat()
+
+        elif type(message) is ObjectId:
+            return str(message)
+
+        elif type(message) is bytes:
+            return str(message)
+
+        return message
+
 
 
 class LogstashFormatterVersion0(LogstashFormatterBase):
