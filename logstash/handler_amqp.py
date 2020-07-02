@@ -1,17 +1,16 @@
-import json
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
 
-from logging import Filter
 from logging.handlers import SocketHandler
 
 import pika
+
 from logstash import formatter
 
 
-class AMQPLogstashHandler(SocketHandler, object):
+class AMQPLogstashHandler(SocketHandler):
     """AMQP Log Format handler
 
     :param host: AMQP host (default 'localhost')

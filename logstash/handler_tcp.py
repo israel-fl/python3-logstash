@@ -1,10 +1,8 @@
-from logging.handlers import DatagramHandler, SocketHandler
+from logging.handlers import SocketHandler
 from logstash import formatter
 
 
-# Derive from object to force a new-style class and thus allow super() to work
-# on Python 2.6
-class TCPLogstashHandler(SocketHandler, object):
+class TCPLogstashHandler(SocketHandler):
     """Python logging handler for Logstash. Sends events over TCP.
     :param host: The host of the logstash server.
     :param port: The port of the logstash server (default 5959).

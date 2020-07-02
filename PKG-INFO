@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: python3-logstash
-Version: 0.4.73
+Version: 0.4.74
 Summary: Python logging handler for Logstash.
 Home-page: https://github.com/israel-fl/python3-logstash
 Author: Israel Flores
