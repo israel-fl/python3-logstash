@@ -1,4 +1,6 @@
-# python-logstash
+# python3-logstash
+
+[![PyPI version](https://badge.fury.io/py/python3-logstash.svg)](https://pypi.org/project/python3-logstash/)
 
 ## Python logging handler for Logstash.
 <https://www.elastic.co/products/logstash>
@@ -8,7 +10,6 @@ This is a copy of python-logstash: <https://pypi.python.org/pypi/python-logstash
 That has been update to work with python 3.
 
 ### Installation
-
 
 Using pip:
 `pip install python3-logstash`
