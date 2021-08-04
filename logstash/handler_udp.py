@@ -1,4 +1,5 @@
 from logging.handlers import DatagramHandler
+
 from logstash.handler_tcp import TCPLogstashHandler
 
 
@@ -14,7 +15,3 @@ class UDPLogstashHandler(TCPLogstashHandler, DatagramHandler):
 
     def makePickle(self, record):
         return self.formatter.format(record)
-
-
-# For backward compatibility
-LogstashHandler = UDPLogstashHandler

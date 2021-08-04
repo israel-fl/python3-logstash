@@ -1,3 +1,4 @@
+import inspect
 import logging
 import socket
 import traceback
@@ -12,12 +13,31 @@ except ImportError:
 class LogstashFormatterBase(logging.Formatter):
     # The list contains all the attributes listed in
     # http://docs.python.org/library/logging.html#logrecord-attributes
-    skip_list = (
-        "args", "asctime", "created", "exc_info", "exc_text", "filename",
-        "funcName", "id", "levelname", "levelno", "lineno", "module",
-        "msecs", "msecs", "message", "msg", "name", "pathname", "process",
-        "processName", "relativeCreated", "thread", "threadName", "extra"
-    )
+    skip_list = {
+        "args",
+        "asctime",
+        "created",
+        "exc_info",
+        "exc_text",
+        "filename",
+        "funcName",
+        "id",
+        "levelname",
+        "levelno",
+        "lineno",
+        "module",
+        "msecs",
+        "message",
+        "msg",
+        "name",
+        "pathname",
+        "process",
+        "processName",
+        "relativeCreated",
+        "thread",
+        "threadName",
+        "extra",
+    }
 
     easy_types = (str, bool, float, int, type(None))
 
@@ -47,7 +67,29 @@ class LogstashFormatterBase(logging.Formatter):
             if key not in self.skip_list:
                 fields[key] = self.simplify(value)
 
+        frame = self.get_frame(record)
+        if frame:
+            cls = self.get_class(frame)
+            if cls:
+                fields["class_name"] = cls.__module__ + "." + cls.__name__
+
         return fields
+
+    @staticmethod
+    def get_frame(record: logging.LogRecord):
+        frame = inspect.currentframe()
+        while frame:
+            frame = frame.f_back
+            frameinfo = inspect.getframeinfo(frame)
+            if frameinfo.filename == record.pathname:
+                return frame
+
+    @staticmethod
+    def get_class(frame):
+        if "self" in frame.f_locals:
+            return type(frame.f_locals["self"])
+        elif "cls" in frame.f_locals:
+            return frame.f_locals["cls"]
 
     def get_debug_fields(self, record):
         fields = {
@@ -87,11 +129,16 @@ class LogstashFormatterBase(logging.Formatter):
     def serialize(cls, message):
         return json.dumps(message)
 
+    def get_message(self, record: logging.LogRecord) -> dict:
+        raise NotImplementedError()
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = self.get_message(record)
+        return self.serialize(message)
+
 
 class LogstashFormatterVersion0(LogstashFormatterBase):
-    version = 0
-
-    def format(self, record):
+    def get_message(self, record):
         # Create message dict
         message = {
             "@timestamp": self.format_timestamp(record.created),
@@ -116,15 +163,14 @@ class LogstashFormatterVersion0(LogstashFormatterBase):
         if record.exc_info:
             message["@fields"].update(self.get_debug_fields(record))
 
-        return self.serialize(message)
+        return message
 
 
 class LogstashFormatterVersion1(LogstashFormatterBase):
-    def format(self, record):
+    def get_message(self, record):
         # Create message dict
         message = {
             "@timestamp": self.format_timestamp(record.created),
-            "@version": "1",
             "message": record.getMessage(),
             "host": self.host,
             "path": record.pathname,
@@ -142,4 +188,7 @@ class LogstashFormatterVersion1(LogstashFormatterBase):
         if record.exc_info:
             message.update(self.get_debug_fields(record))
 
-        return self.serialize(message)
+        return message
+
+
+versions = {0: LogstashFormatterVersion0, 1: LogstashFormatterVersion1}
