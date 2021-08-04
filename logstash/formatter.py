@@ -129,9 +129,16 @@ class LogstashFormatterBase(logging.Formatter):
     def serialize(cls, message):
         return json.dumps(message)
 
+    def get_message(self, record: logging.LogRecord) -> dict:
+        raise NotImplementedError()
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = self.get_message(record)
+        return self.serialize(message)
+
 
 class LogstashFormatterVersion0(LogstashFormatterBase):
-    def format(self, record):
+    def get_message(self, record):
         # Create message dict
         message = {
             "@timestamp": self.format_timestamp(record.created),
@@ -156,11 +163,11 @@ class LogstashFormatterVersion0(LogstashFormatterBase):
         if record.exc_info:
             message["@fields"].update(self.get_debug_fields(record))
 
-        return self.serialize(message)
+        return message
 
 
 class LogstashFormatterVersion1(LogstashFormatterBase):
-    def format(self, record):
+    def get_message(self, record):
         # Create message dict
         message = {
             "@timestamp": self.format_timestamp(record.created),
@@ -181,7 +188,7 @@ class LogstashFormatterVersion1(LogstashFormatterBase):
         if record.exc_info:
             message.update(self.get_debug_fields(record))
 
-        return self.serialize(message)
+        return message
 
 
 versions = {0: LogstashFormatterVersion0, 1: LogstashFormatterVersion1}

@@ -1,6 +1,7 @@
 from logstash.formatter import LogstashFormatterVersion0, LogstashFormatterVersion1
+from logstash.handler_http import HTTPLogstashHandler
 from logstash.handler_tcp import TCPLogstashHandler
-from logstash.handler_udp import LogstashHandler, UDPLogstashHandler
+from logstash.handler_udp import UDPLogstashHandler
 
 try:
     from logstash.handler_amqp import AMQPLogstashHandler
