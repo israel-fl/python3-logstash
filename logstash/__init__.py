@@ -9,4 +9,4 @@ except:
     # you need to install AMQP support to enable this handler.
     pass
 
-__version__ = "0.5.0"
+__version__ = "0.5.1"
