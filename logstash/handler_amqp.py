@@ -73,11 +73,7 @@ class AMQPLogstashHandler(SocketHandler):
 
         # Extract Logstash paramaters
         self.tags = tags or []
-        fn = (
-            formatter.LogstashFormatterVersion1
-            if version == 1
-            else formatter.LogstashFormatterVersion0
-        )
+        fn = formatter.versions[version]
         self.formatter = fn(message_type, tags, fqdn)
 
         # Standard logging parameters
