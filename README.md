@@ -12,7 +12,9 @@ That has been update to work with python 3.
 ### Installation
 
 Using pip:
-`pip install logstash-sync`
+```bash
+pip install logstash-sync
+```
 
 ### Usage
 
@@ -20,7 +22,7 @@ Using pip:
 
 #### For example:
 
-```
+```python
 import logging
 import logstash
 import sys
@@ -52,34 +54,34 @@ When using `extra` field make sure you don't use reserved names. From `Python do
      | "The keys in the dictionary passed in extra should not clash with the keys used by the logging system. (See the `Formatter <https://docs.python.org/2/library/logging.html#logging.Formatter>`_ documentation for more information on which keys are used by the logging system.)"
 
 To use the AMQPLogstashHandler you will need to install pika first.
-```
+```bash
    pip install pika
 ```
 
 For example::
-```
-  import logging
-  import logstash
+```python
+import logging
+import logstash
 
-  test_logger = logging.getLogger('python-logstash-logger')
-  test_logger.setLevel(logging.INFO)
-  test_logger.addHandler(logstash.AMQPLogstashHandler(host='localhost', version=1))
+test_logger = logging.getLogger('python-logstash-logger')
+test_logger.setLevel(logging.INFO)
+test_logger.addHandler(logstash.AMQPLogstashHandler(host='localhost', version=1))
 
-  test_logger.info('python-logstash: test logstash info message.')
-  try:
-      1/0
-  except:
-      test_logger.exception('python-logstash-logger: Exception with stack trace!')
+test_logger.info('python-logstash: test logstash info message.')
+try:
+    1/0
+except:
+    test_logger.exception('python-logstash-logger: Exception with stack trace!')
 ```
 
 
 ### Using with Django
 
 Modify your `settings.py` to integrate `python3-logstash` with Django's logging::
-```
-  LOGGING = {
-    ...
-    'handlers': {
+```python
+LOGGING = {
+     # ...
+     'handlers': {
         'logstash': {
             'level': 'DEBUG',
             'class': 'logstash.LogstashHandler',
@@ -90,21 +92,21 @@ Modify your `settings.py` to integrate `python3-logstash` with Django's logging:
             'fqdn': False, # Fully qualified domain name. Default value: false.
             'tags': ['tag1', 'tag2'], # list of tags. Default: None.
         },
-    },
-    'loggers': {
+     },
+     'loggers': {
         'django.request': {
             'handlers': ['logstash'],
             'level': 'DEBUG',
             'propagate': True,
         },
-    },
-    ...
-  }
+     },
+     # ...
+}
 ```
 
 ### Using with Gunicorn
 Create a logging.conf similar to this:
-```
+```ini
 [loggers]
 keys=root, logstash.error, logstash.access
 
